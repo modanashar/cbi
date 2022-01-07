@@ -6,9 +6,9 @@
 
  # Contents
 
- *[A First Example](#a-first-example)
- *[A Second Example](#a-second-example)
- *[Why bother?](#why-bother?)
+ * [A First Example](#a-first-example)
+ * [A Second Example](#a-second-example)
+ * [Why bother?](#why-bother?)
 
 # A First Example
 
