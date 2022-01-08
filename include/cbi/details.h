@@ -21,53 +21,46 @@ namespace cbi
 		}
 		
 
-		constexpr auto limited_add(const std::intmax_t fst, const std::intmax_t sec)
+		[[nodiscard]] constexpr std::optional<std::intmax_t>
+		limited_add(const std::intmax_t fst, const std::intmax_t sec)
 		{
 			if (fst > 0 && sec > std::numeric_limits<std::intmax_t>::max() - fst) 
-				return std::numeric_limits<std::intmax_t>::max();
+				return std::nullopt;
 			if (fst < 0 && sec < std::numeric_limits<std::intmax_t>::min() - fst) 
-				return std::numeric_limits<std::intmax_t>::min();
+				return std::nullopt;
 			return fst + sec;
 		}
 
-		constexpr auto limited_sub(const std::intmax_t fst, const std::intmax_t sec)
+		[[nodiscard]] constexpr std::optional<std::intmax_t>
+		limited_sub(const std::intmax_t fst, const std::intmax_t sec)
 		{
 			if (sec < 0 && fst > std::numeric_limits<std::intmax_t>::max() + sec) 
-				return std::numeric_limits<std::intmax_t>::max();
+				return std::nullopt;
 			if (sec > 0 && fst < std::numeric_limits<std::intmax_t>::min() + sec) 
-				return std::numeric_limits<std::intmax_t>::min();
+				return std::nullopt;
 			return fst - sec;
 		}
 
-		constexpr auto limited_mul(const std::intmax_t fst, const std::intmax_t sec)
+		[[nodiscard]] constexpr std::optional<std::intmax_t>
+		limited_mul(const std::intmax_t fst, const std::intmax_t sec)
 		{
 			if (fst > 0 && sec > 0 && fst > std::numeric_limits<std::intmax_t>::max() / sec)
 			{
-				return (fst > 0 && sec > 0) || (fst < 0 && sec < 0)
-					? std::numeric_limits<std::intmax_t>::max()
-					: std::numeric_limits<std::intmax_t>::min();
+				return std::nullopt;
 			}
 			if (fst < 0 && sec < 0 && fst < std::numeric_limits<std::intmax_t>::min() / sec)
 			{
-				return (fst > 0 && sec > 0) || (fst < 0 && sec < 0)
-					? std::numeric_limits<std::intmax_t>::max()
-					: std::numeric_limits<std::intmax_t>::min();
+				return std::nullopt;
 			}
 			if (fst > 0 && sec < 0 && fst > std::numeric_limits<std::intmax_t>::min() / sec)
 			{
-				return (fst > 0 && sec > 0) || (fst < 0 && sec < 0)
-					? std::numeric_limits<std::intmax_t>::max()
-					: std::numeric_limits<std::intmax_t>::min();
+				return std::nullopt;
 			}
 			if (fst < 0 && sec > 0 && fst < std::numeric_limits<std::intmax_t>::min() / sec)
 			{
-				return (fst > 0 && sec > 0) || (fst < 0 && sec < 0)
-					? std::numeric_limits<std::intmax_t>::max()
-					: std::numeric_limits<std::intmax_t>::min();
+				return std::nullopt;
 			}
 			return fst * sec;
 		}
-
-		static_assert(limited_mul(std::numeric_limits<int64_t>::min(), 2) == std::numeric_limits<int64_t>::min());
 	}
 }

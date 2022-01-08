@@ -166,7 +166,10 @@ namespace cbi
 		constexpr auto upper_bound = details::limited_add(Fst::upper_bound(), Sec::upper_bound());
 		constexpr auto lower_bound = details::limited_add(Fst::lower_bound(), Sec::lower_bound());
 
-		using ResType = decltype(details::find_type<lower_bound, upper_bound>(fst, sec));
+		static_assert(upper_bound.has_value() && lower_bound.has_value(),
+			"Possible overflow detected!");
+
+		using ResType = decltype(details::find_type<*lower_bound, *upper_bound>(fst, sec));
 		static_assert(!std::same_as<ResType, std::false_type>, "Couldn't find fitting type");
 
 		return ResType{ static_cast<typename ResType::underlying_type>(fst.get() + sec.get()) };
@@ -178,11 +181,16 @@ namespace cbi
 	>
 	constexpr auto operator-(Fst fst, Sec sec)
 	{
-		constexpr auto upper_bound = details::limited_sub(Fst::upper_bound(), Sec::upper_bound());
-		constexpr auto lower_bound = details::limited_sub(Fst::lower_bound(), Sec::lower_bound());
+		constexpr auto b0 = details::limited_sub(Fst::upper_bound(), Sec::upper_bound());
+		constexpr auto b1 = details::limited_sub(Fst::upper_bound(), Sec::lower_bound());
+		constexpr auto b2 = details::limited_sub(Fst::lower_bound(), Sec::upper_bound());
+		constexpr auto b3 = details::limited_sub(Fst::lower_bound(), Sec::lower_bound());
+		static_assert(b0.has_value() && b1.has_value() && b2.has_value() && b3.has_value(),
+			"Possible overflow detected!");
+		constexpr auto lower_bound = std::min(std::min(std::min(*b0, *b1), *b2), *b3);
+		constexpr auto upper_bound = std::max(std::max(std::max(*b0, *b1), *b2), *b3);
 
-		using ResType = decltype(details::find_type<std::min(lower_bound, upper_bound),
-			std::max(lower_bound, upper_bound)>(fst, sec));
+		using ResType = decltype(details::find_type<lower_bound, upper_bound>(fst, sec));
 		static_assert(!std::same_as<ResType, std::false_type>, "Couldn't find fitting type");
 
 		return ResType{ static_cast<typename ResType::underlying_type>(fst.get() - sec.get()) };
@@ -194,8 +202,14 @@ namespace cbi
 	>
 	constexpr auto operator*(Fst fst, Sec sec)
 	{
-		constexpr auto upper_bound = details::limited_mul(Fst::upper_bound(), Sec::upper_bound());
-		constexpr auto lower_bound = details::limited_mul(Fst::lower_bound(), Sec::lower_bound());
+		constexpr auto b0 = details::limited_mul(Fst::upper_bound(), Sec::upper_bound());
+		constexpr auto b1 = details::limited_mul(Fst::upper_bound(), Sec::lower_bound());
+		constexpr auto b2 = details::limited_mul(Fst::lower_bound(), Sec::upper_bound());
+		constexpr auto b3 = details::limited_mul(Fst::lower_bound(), Sec::lower_bound());
+		static_assert(b0.has_value() && b1.has_value() && b2.has_value() && b3.has_value(),
+			"Possible overflow detected!");
+		constexpr auto lower_bound = std::min(std::min(std::min(*b0, *b1), *b2), *b3);
+		constexpr auto upper_bound = std::max(std::max(std::max(*b0, *b1), *b2), *b3);
 
 		using ResType = decltype(details::find_type<lower_bound, upper_bound>(fst, sec));
 		static_assert(!std::same_as<ResType, std::false_type>, "Couldn't find fitting type");
@@ -209,17 +223,15 @@ namespace cbi
 	>
 	constexpr auto operator/(Fst fst, Sec sec)
 	{
-		constexpr auto upper_bound = Sec::lower_bound() != 0
-			? Fst::upper_bound() / Sec::lower_bound()
-			: (Fst::upper_bound() > 0 && Sec::lower_bound() > 0) || (Fst::upper_bound() < 0 && Sec::lower_bound() < 0)
-				? std::numeric_limits<intmax_t>::max()
-				: std::numeric_limits<intmax_t>::min();
+		static_assert(Sec::lower_bound() > 0 && Sec::upper_bound() > 0 ||
+			Sec::lower_bound() < 0 && Sec::upper_bound() < 0, "Division by zero is possible");
 
-		constexpr auto lower_bound = Sec::upper_bound() != 0
-			? Fst::lower_bound() / Sec::upper_bound()
-			: (Fst::lower_bound() > 0 && Sec::upper_bound() > 0) || (Fst::lower_bound() < 0 && Sec::upper_bound() < 0)
-				? std::numeric_limits<intmax_t>::max()
-				: std::numeric_limits<intmax_t>::min();
+		constexpr auto b0 = Fst::upper_bound() / Sec::upper_bound();
+		constexpr auto b1 = Fst::upper_bound() / Sec::lower_bound();
+		constexpr auto b2 = Fst::lower_bound() / Sec::upper_bound(); 
+		constexpr auto b3 = Fst::lower_bound() / Sec::lower_bound();
+		constexpr auto lower_bound = std::min(std::min(std::min(b0, b1), b2), b3);
+		constexpr auto upper_bound = std::max(std::max(std::max(b0, b1), b2), b3);
 
 		using ResType = decltype(details::find_type<lower_bound, upper_bound>(fst, sec));
 		static_assert(!std::same_as<ResType, std::false_type>, "Couldn't find fitting type");

@@ -68,7 +68,7 @@ TEST_CASE("add large bounds")
 
 TEST_CASE("add very large bounds")
 {
-	constexpr cbi::Bounded<int64_t, 1, std::numeric_limits<int64_t>::max()> fst{ 2 };
+	constexpr cbi::Bounded<int64_t, 1, std::numeric_limits<int64_t>::max()-6> fst{ 2 };
 	constexpr cbi::Bounded<int32_t, 1, 6> sec{ 2 };
 	auto res = fst + sec;
 
@@ -100,24 +100,26 @@ TEST_CASE("mul large bounds")
 	REQUIRE(res.get() == 4);
 }
 
+
 TEST_CASE("mul very large bounds")
 {
-	constexpr cbi::Bounded<int64_t, 1, std::numeric_limits<int64_t>::max()> fst{ 2 };
-	constexpr cbi::Bounded<int32_t, 1, 6> sec{ 2 };
+
+	constexpr cbi::Bounded<int64_t, 1, std::numeric_limits<int64_t>::max()/2> fst{ 2 };
+	constexpr cbi::Bounded<int32_t, 1, 2> sec{ 2 };
 	auto res = fst * sec;
 
-	using expected_t = cbi::Bounded<int64_t, 1, std::numeric_limits<int64_t>::max()>;
+	using expected_t = cbi::Bounded<int64_t, 1, std::numeric_limits<int64_t>::max()-1>;
 	static_assert(std::same_as<expected_t, decltype(res)>);
 	REQUIRE(res.get() == 4);
 }
 
 TEST_CASE("mul very large negative bounds")
 {
-	constexpr cbi::Bounded<int64_t, std::numeric_limits<int64_t>::min(), 5> fst{ 2 };
+	constexpr cbi::Bounded<int64_t, std::numeric_limits<int64_t>::min()/6, 5> fst{2};
 	constexpr cbi::Bounded<int32_t, 2, 6> sec{ 2 };
 	auto res = fst * sec;
 
-	using expected_t = cbi::Bounded<int64_t, std::numeric_limits<int64_t>::min(), 30>;
+	using expected_t = cbi::Bounded<int64_t, std::numeric_limits<int64_t>::min()+2, 30>;
 	static_assert(std::same_as<expected_t, decltype(res)>);
 	REQUIRE(res.get() == 4);
 }
@@ -129,7 +131,7 @@ TEST_CASE("sub small bounds")
 	constexpr cbi::Bounded<int32_t, 1, 6> sec{ 2 };
 	auto res = fst - sec;
 
-	using expected_t = cbi::Bounded<int32_t, 0, 4>;
+	using expected_t = cbi::Bounded<int32_t, -5, 9>;
 
 	static_assert(std::same_as<expected_t, decltype(res)>);
 	REQUIRE(res.get() == 0);
@@ -141,7 +143,7 @@ TEST_CASE("sub large bounds")
 	constexpr cbi::Bounded<int32_t, 1, 6> sec{ 2 };
 	auto res = fst - sec;
 
-	using expected_t = cbi::Bounded<int32_t, 0, std::numeric_limits<int32_t>::max() - 6ll>;
+	using expected_t = cbi::Bounded<int32_t, -5, std::numeric_limits<int32_t>::max() - 1ll>;
 	static_assert(std::same_as<expected_t, decltype(res)>);
 	REQUIRE(res.get() == 0);
 }
@@ -152,7 +154,7 @@ TEST_CASE("sub very large bounds")
 	constexpr cbi::Bounded<int32_t, 1, 6> sec{ 2 };
 	auto res = fst - sec;
 
-	using expected_t = cbi::Bounded<int64_t, 0, std::numeric_limits<int64_t>::max() - 6>;
+	using expected_t = cbi::Bounded<int64_t, -5, std::numeric_limits<int64_t>::max() - 1>;
 	static_assert(std::same_as<expected_t, decltype(res)>);
 	REQUIRE(res.get() == 0);
 }
@@ -163,7 +165,7 @@ TEST_CASE("sub very large bounds inverted")
 	constexpr cbi::Bounded<int64_t, 1, std::numeric_limits<int64_t>::max()> sec{ 2 };
 	auto res = fst - sec;
 
-	using expected_t = cbi::Bounded<int64_t, 6ll - std::numeric_limits<int64_t>::max(), 0>;
+	using expected_t = cbi::Bounded<int64_t, 1ll - std::numeric_limits<int64_t>::max(), 5>;
 	static_assert(std::same_as<expected_t, decltype(res)>);
 	REQUIRE(res.get() == 0);
 }
