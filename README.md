@@ -30,14 +30,21 @@
  # A Second Example
 
  ```cpp
-    constexpr cbi::Bounded<int64_t, std::numeric_limits<int64_t>::min(), 5> fst{ 2 };
+    constexpr cbi::Bounded<int64_t, 1, 5> fst{ 2 };
 	constexpr cbi::Bounded<int32_t, 2, 6> sec{ 2 };
 	auto res = fst * sec; // + - * / operators are supported
 
-	using expected_t = cbi::Bounded<int64_t, std::numeric_limits<int64_t>::min(), 30>;
+	using expected_t = cbi::Bounded<int64_t, 2, 30>;
 	static_assert(std::same_as<expected_t, decltype(res)>);
  ```
 
+ # A Third Example
+
+ ```cpp
+    constexpr cbi::Bounded<int64_t, std::numeric_limits<int64_t>::min(), 5> fst{ 2 };
+	constexpr cbi::Bounded<int32_t, 2, 6> sec{ 2 };
+	auto res = fst * sec; // won't compile - reason: overflow
+ ```
  # Why bother?
 
  The idea behind these bounded integers is to work like compile time contracts that:
